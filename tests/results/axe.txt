@@ -1,0 +1,12 @@
+
+== /demo/blank.html: 27 rules passed, 0 rules with violations
+
+== /pages/concept-with-navigation.html: 31 rules passed, 6 rules with violations
+  [critical] aria-allowed-attr: Elements must only use supported ARIA attributes — db-player: 0, host page: 1
+  [serious] aria-hidden-focus: ARIA hidden element must not be focusable or contain focusable elements — db-player: 0, host page: 7
+  [serious] aria-progressbar-name: ARIA progressbar nodes must have an accessible name — db-player: 0, host page: 1
+  [serious] color-contrast: Elements must meet minimum color contrast ratio thresholds — db-player: 0, host page: 7
+  [serious] link-name: Links must have discernible text — db-player: 0, host page: 1
+  [serious] list: <ul> and <ol> must only directly contain <li>, <script> or <template> elements — db-player: 0, host page: 1
+
+Critical/serious issues inside db-player: 0

@@ -1,0 +1,4 @@
+run 1: 4.35 s, 44.8 KB, 16 requests
+run 2: 4.34 s, 44.8 KB, 16 requests
+run 3: 4.34 s, 44.8 KB, 16 requests
+median: 4.34 s, 44.8 KB transferred until the player is rendered (controls + video metadata)

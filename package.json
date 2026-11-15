@@ -1,0 +1,19 @@
+{
+  "name": "db-player",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Accessible lesson video player web component (DIGITAL BRIDGE Accessibility Hackathon 2026, Track 2)",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/unit.test.mjs tests/api.test.mjs",
+    "test:e2e": "node tests/e2e.mjs",
+    "axe": "node tests/axe.mjs",
+    "slow3g": "node tests/slow3g.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "axe-core": "^4.14.0",
+    "playwright": "^1.65.1"
+  }
+}
