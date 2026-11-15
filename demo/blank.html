@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="am">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>db-player — blank host page (no Bootstrap, no Savanna CSS)</title>
+</head>
+<body>
+<main>
+  <h1>db-player</h1>
+  <script src="/module/db-player.js" defer></script>
+  <db-player
+    src="/media/lesson.mp4"
+    poster="/media/poster.png"
+    captions="/media/lesson.am.vtt,/media/lesson.en.vtt"
+    describe="/media/lesson.ad.am.vtt,/media/lesson.ad.en.vtt"
+    sign=""
+    lesson-title="የቨርቹዋል ረዳት ሥራ የወደፊት ዕጣ"
+    lang="am"></db-player>
+</main>
+<script>
+  ['progress', 'complete', 'prefs', 'sign-request', 'offline'].forEach((n) =>
+    document.addEventListener(`db-player:${n}`, (e) => console.log(`db-player:${n}`, e.detail)));
+</script>
+</body>
+</html>

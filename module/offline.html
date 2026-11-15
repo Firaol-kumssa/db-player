@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="am">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson</title>
+<style>
+  body{font-family:system-ui,"Noto Sans Ethiopic","Kefa",sans-serif;line-height:1.7;margin:0 auto;padding:1rem;max-width:44rem;color:#1a1a1a;background:#fff}
+  h1{font-size:1.5rem}h2{font-size:1.25rem;margin-top:1.5rem}
+  audio{width:100%;min-height:3rem}
+  ol{padding-inline-start:1.25rem}li{margin-block:.5rem}
+  .t{color:#555;font-variant-numeric:tabular-nums;margin-inline-end:.5rem}
+  a{color:#002b56;font-weight:600}
+  :focus-visible{outline:3px solid #f5a300;outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title"></h1>
+  <h2 id="h-audio"></h2>
+  <audio id="audio" controls preload="metadata" aria-labelledby="h-audio"></audio>
+  <h2 id="h-tr"></h2>
+  <ol id="lines" aria-labelledby="h-tr"></ol>
+  <p><a id="back" href="#"></a></p>
+</main>
+<script>
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const lang = q.get('lang') === 'en' ? 'en' : 'am';
+  document.documentElement.lang = lang;
+  const t = await fetch(`i18n/${lang}.json`).then((r) => r.json()).catch(() => ({}));
+  document.title = t.offlineTitle || 'Lesson';
+  document.getElementById('title').textContent = q.get('title') || t.offlineTitle || '';
+  document.getElementById('h-audio').textContent = t.offlineAudio || '';
+  document.getElementById('h-tr').textContent = t.transcript || '';
+  const back = document.getElementById('back');
+  back.textContent = t.offlineBack || '';
+  back.href = q.get('back') || '/';
+  if (q.get('audio')) document.getElementById('audio').src = q.get('audio');
+  const vtts = (q.get('vtt') || '').split(',').filter(Boolean);
+  const file = vtts.find((v) => v.includes(`.${lang}.vtt`)) || vtts[0];
+  if (!file) return;
+  const text = await fetch(file).then((r) => r.text()).catch(() => '');
+  const ol = document.getElementById('lines');
+  for (const block of text.replace(/\r/g, '').split(/\n{2,}/)) {
+    const lines = block.split('\n').filter(Boolean);
+    const i = lines.findIndex((l) => l.includes('-->'));
+    if (i < 0) continue;
+    const li = document.createElement('li');
+    const ts = document.createElement('span');
+    ts.className = 't'; ts.lang = 'en';
+    ts.textContent = lines[i].split('-->')[0].trim().replace(/^00:/, '').replace(/\.\d+$/, '');
+    li.append(ts, lines.slice(i + 1).join(' ').replace(/<[^>]+>/g, ''));
+    ol.append(li);
+  }
+})();
+</script>
+</body>
+</html>
