@@ -1,0 +1,116 @@
+openapi: 3.0.3
+info:
+  title: db-player lesson media API
+  version: 1.0.0
+  description: |
+    Level 2 API for db-player (DIGITAL BRIDGE Accessibility Hackathon 2026, Track 2).
+    Read a lesson's media and tracks, get its transcript as plain text, download the offline audio,
+    and upload a new caption file. Errors are JSON with a plain-language `error` message.
+    When a caption file is uploaded, the server POSTs a `captions.uploaded` event to `CAPTION_WEBHOOK_URL` (set in .env).
+  license: { name: MIT }
+servers:
+  - url: http://localhost:8081
+paths:
+  /api/v1/lessons/{id}:
+    get:
+      summary: Lesson metadata and track list
+      parameters: [ { $ref: '#/components/parameters/id' } ]
+      responses:
+        '200':
+          description: The lesson
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Lesson' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/lessons/{id}/transcript:
+    get:
+      summary: Transcript as plain text, one line per caption with its start time
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - { name: lang, in: query, schema: { type: string, pattern: '^[a-z]{2,3}$', default: am }, description: 'Language code, e.g. am or en' }
+        - { name: format, in: query, schema: { type: string, enum: [text, vtt], default: text }, description: 'vtt returns the raw WebVTT file' }
+      responses:
+        '200':
+          description: The transcript
+          content:
+            text/plain: { schema: { type: string }, example: "[0:00] [ለስላሳ ሙዚቃ]\n[0:03] እንኳን ደህና መጡ።\n" }
+            text/vtt: { schema: { type: string } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/lessons/{id}/offline-pack:
+    get:
+      summary: Low-bitrate narration audio (single MP3) for offline listening
+      parameters: [ { $ref: '#/components/parameters/id' } ]
+      responses:
+        '200':
+          description: MP3 audio, sent as an attachment
+          content:
+            audio/mpeg: { schema: { type: string, format: binary } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/lessons/{id}/captions:
+    post:
+      summary: Upload a WebVTT caption file for one language
+      description: The file is validated (WEBVTT header, valid times, end after start, text in every cue, UTF-8, at most 512 KB). It replaces any earlier upload for the same language.
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - { name: lang, in: query, required: true, schema: { type: string, pattern: '^[a-z]{2,3}$' }, example: om }
+      requestBody:
+        required: true
+        content:
+          text/vtt:
+            schema: { type: string }
+            example: "WEBVTT\n\n00:00:00.200 --> 00:00:02.800\n[muuziqaa laafaa]\n"
+      responses:
+        '201':
+          description: Saved
+          headers:
+            Location: { schema: { type: string }, description: Where the stored VTT can be read }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Uploaded' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '413': { description: File larger than 512 KB, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '415': { description: Body is not text/vtt, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+components:
+  parameters:
+    id: { name: id, in: path, required: true, schema: { type: string }, example: future-of-va-work }
+  responses:
+    NotFound:
+      description: Unknown lesson id or missing language
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { error: 'No lesson with the id "abc". Known ids: future-of-va-work.', status: 404 } } }
+    BadRequest:
+      description: The request or the caption file is not valid; the message says why in words
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' }, example: { error: 'Cue 2: the end time must be after the start time.', status: 400 } } }
+  schemas:
+    Error:
+      type: object
+      properties: { error: { type: string }, status: { type: integer } }
+    Track:
+      type: object
+      properties:
+        kind: { type: string, enum: [captions, descriptions] }
+        lang: { type: string }
+        url: { type: string }
+    Lesson:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: object, properties: { am: { type: string }, en: { type: string } } }
+        durationSeconds: { type: number }
+        narration: { type: string, description: TTS engine used to build the clip }
+        video: { type: string }
+        poster: { type: string }
+        offlineAudio: { type: string }
+        signLanguageVideo: { type: string, nullable: true }
+        tracks: { type: array, items: { $ref: '#/components/schemas/Track' } }
+    Uploaded:
+      type: object
+      properties:
+        event: { type: string, example: captions.uploaded }
+        lesson: { type: string }
+        lang: { type: string }
+        cues: { type: integer }
+        at: { type: string, format: date-time }
+        transcript: { type: string }
+        webhook: { type: object, properties: { sent: { type: boolean }, status: { type: integer } } }
