@@ -233,4 +233,6 @@ Not finished:
 
 ## Libraries and their licences
 
-The module and the API have no runtime libraries. Build tools: Python Pillow (HPND), FFmpeg (LGPL/GPL), edge-tts (LGPL-3.0, optional). Test tools (dev only): Playwright (Apache-2.0), axe-core and @axe-core/playwright (MPL-2.0). The API's `/docs` page loads Swagger UI (Apache-2.0) from unpkg. Code licence: the open licence ALX named at kick-off.
+The module and the API have no runtime libraries. Build tools: Python Pillow (HPND), FFmpeg (LGPL/GPL), edge-tts (LGPL-3.0, optional). Test tools (dev only): Playwright (Apache-2.0), axe-core and @axe-core/playwright (MPL-2.0). The API's `/docs` page loads Swagger UI (Apache-2.0) from unpkg.
+
+**Code licence: MIT** ([LICENSE](LICENSE), copyright Firaol Kumssa). _To confirm with ALX: MIT is used until the open licence named at kick-off is confirmed._ This licence covers our code (`module/`, `api/`, `tools/`, `scripts/`, `tests/`, `demo/`) and the generated lesson media. The Savanna starter in `savanna/` is ALX's own and keeps ALX's terms.
