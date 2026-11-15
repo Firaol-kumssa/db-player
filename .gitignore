@@ -4,5 +4,4 @@ __pycache__/
 .DS_Store
 api/uploads/
 .venv/
-savanna/
 tests/results/*.png
