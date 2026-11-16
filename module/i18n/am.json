@@ -49,6 +49,7 @@
   "switchLang": "English",
   "langSwitched": "ቋንቋ፦ አማርኛ። የጽሑፍ መግለጫዎቹም ወደ አማርኛ ተቀይረዋል።",
   "pageSwitched": "ገጹ በሙሉ ወደ አማርኛ ተቀይሯል።",
+  "pageLangHint": "የገጹን ቋንቋ ቀይር",
   "sign": "የምልክት ቋንቋ",
   "signOn": "የምልክት ቋንቋ መስኮት በርቷል",
   "signOff": "የምልክት ቋንቋ መስኮት ጠፍቷል",

@@ -26,8 +26,9 @@
   const json = (u) => fetch(u).then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
   const norm = (s) => s.replace(/\s+/g, ' ').trim();
 
-  let dict = {}, ui = {}, current = 'en', amTitle = null, btn, label, live;
+  let dict = {}, ui = {}, current = 'en', amTitle = null, btn, label, hint, live, wrap, observer, queued = false;
   const origText = new Map();   // text node -> original value
+  const setText = new Map();    // text node -> the value we last wrote (to notice when the host page rewrites it)
   const origAttr = new Map();   // element  -> { attr: original value }
   const origTitle = document.title;
 
@@ -55,12 +56,14 @@
 
   function translate(lang) {
     for (const n of textNodes()) {
-      if (!origText.has(n)) origText.set(n, n.nodeValue);
+      // new node, or the host page rewrote it since we last touched it: its current text is the new original
+      if (!origText.has(n) || (setText.has(n) && n.nodeValue !== setText.get(n))) origText.set(n, n.nodeValue);
       const src = origText.get(n);
       const t = lang === 'am' ? dict[norm(src)] : null;
       // keep the surrounding spaces so inline words (<b>, <span>) stay separated
       const next = t ? src.match(/^\s*/)[0] + t + src.match(/\s*$/)[0] : src;
       if (n.nodeValue !== next) n.nodeValue = next;
+      setText.set(n, next);
     }
     for (const el of document.body.querySelectorAll(ATTRS.map((a) => `[${a}]`).join(','))) {
       if (el.closest(SKIP)) continue;
@@ -86,24 +89,32 @@
     save(KEY, current);
     const t = ui[current] || {};
     label.textContent = t.switchLang || (current === 'am' ? 'English' : 'አማርኛ');
+    hint.textContent = t.pageLangHint ? ` (${t.pageLangHint})` : '';   // screen readers hear "English (change page language)"
+    hint.lang = current;
     btn.lang = current === 'am' ? 'en' : 'am';   // the button is written in the language it switches to
     if (announce && t.pageSwitched) { live.textContent = ''; setTimeout(() => { live.textContent = t.pageSwitched; }, 50); }
+  }
+
+  function place() {
+    const header = document.querySelector('.header');   // Savanna's fixed top bar
+    if (header) { wrap.classList.remove('floating'); header.append(wrap); }
+    else { wrap.classList.add('floating'); document.body.prepend(wrap); }
   }
 
   function build() {
     const style = document.createElement('style');
     style.textContent = CSS;
     document.head.append(style);
-    const wrap = document.createElement('div');
+    wrap = document.createElement('div');
     wrap.id = 'db-page-lang-wrap';
     btn = document.createElement('button');
     btn.type = 'button';
     btn.id = 'db-page-lang';
-    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg><span></span>';
-    label = btn.querySelector('span');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg><span></span><span class="db-page-lang-sr"></span>';
+    [label, hint] = btn.querySelectorAll('span');
     wrap.append(btn);
     const header = document.querySelector('.header');   // Savanna's fixed top bar
-    if (header) header.append(wrap); else { wrap.classList.add('floating'); document.body.prepend(wrap); }
+    place();
     live = document.createElement('div');
     live.className = 'db-page-lang-sr';
     live.setAttribute('role', 'status');
@@ -122,6 +133,19 @@
     const player = document.querySelector('db-player');
     const start = load(KEY) || (me && me.dataset.default) || (player && player.getAttribute('lang')) || document.documentElement.lang || 'en';
     apply(String(start).toLowerCase().startsWith('am') ? 'am' : 'en', false);
+    // Keep everything in the chosen language even when the host page adds or rewrites content later
+    // (menus, pop-ups, re-rendered headers), and put the switch back if the host removes it.
+    observer = new MutationObserver(() => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        if (!wrap.isConnected) place();
+        translate(current);
+        observer.takeRecords();   // ignore the changes we just made ourselves
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
