@@ -47,7 +47,7 @@ nginx serves the untouched Savanna starter as the site root and our `module/`, `
 | `describe` | Comma list of audio-description WebVTT files, one per language |
 | `sign` | Sign-language video. Empty = the player says honestly there is none yet and offers "Ask for a sign-language video" |
 | `offline-audio` | Low-bitrate audio for the offline pack (default: `src` with `-low.mp3`) |
-| `lang` | `am` (default) or `en`. Interface language |
+| `lang` | `am` (default) or `en`. The starting interface language; the learner can change it with the language button, and their choice is remembered |
 | `poster`, `lesson-title` | Optional |
 
 **Theming.** All the player's CSS lives in a shadow root, so it doesn't restyle the host page and the host doesn't restyle it. It reads the host's look through CSS variables, which pass into the shadow root:
@@ -80,6 +80,7 @@ document.addEventListener('db-player:complete', () => markLessonDone());
 - Keyboard: K or Space (on the video) plays and pauses, the arrows move 5 s, Tab moves between controls and Escape closes dialogs. Shortcuts work only while focus is inside the player (WCAG 2.1.4). They are listed in a real `<dialog>`.
 - Captions: the VTT tracks are set to `mode = 'hidden'`, and the player reads `cuechange` and draws cues itself. The learner chooses size (4), colours (3), background (solid or see-through) and position (top, bottom, or **below the video**, which is best at 200% zoom on a phone). The choice is remembered and announced.
 - Transcript: built from the same VTT. Every line is a button that jumps to its time, the current line is marked `aria-current`, and the whole transcript downloads as text.
+- Language: a button above the video, labelled in the other language ("English" or "አማርኛ", with its own `lang` so screen readers pronounce it correctly), switches every label, the captions, the transcript and the audio description between Amharic and English. The choice is saved in `localStorage` and survives a reload. If the host page changes its `lang` attribute later, the host wins.
 - Quiet mode: a toggle button that makes the player stop speaking (no audio-description voice) and stop sending announcements such as "Captions on" to the screen reader. It gives one last announcement first, and errors are still announced. A web page can't switch TalkBack itself off: on Android, hold both volume keys for 3 seconds (if the TalkBack shortcut is on) or go to Settings › Accessibility › TalkBack.
 - Audio description: when switched on, the video pauses at each description, reads it with `speechSynthesis` (am-ET), then resumes. If the phone has no Amharic voice, the text is shown on screen and sent to the screen reader through a live region.
 - Sign language: a second `<video>` kept in sync on play, pause, seeking and rate change, with drift corrected once a second. It moves with four position buttons and resizes with Larger/Smaller. No dragging.
@@ -180,10 +181,11 @@ BASE=http://localhost:8080 npm run slow3g     # Slow 3G load time and KB
 
 Results from 15 November 2026 are saved in `tests/results/`.
 
-**End-to-end (`tests/e2e.mjs`), 29 of 30 checks pass**, on both `demo/blank.html` and the Savanna page:
+**End-to-end (`tests/e2e.mjs`), 33 of 34 checks pass**, on both `demo/blank.html` and the Savanna page:
 
 - No console errors from db-player.
-- Tab reaches all 15 controls.
+- Tab reaches all 16 controls.
+- The language button switches to English (labels, captions, transcript), the choice survives a reload, and the button switches back.
 - Quiet mode makes one last announcement, then the live region stays silent.
 - Every control is at least 44 × 44 px.
 - K on the video plays it.
