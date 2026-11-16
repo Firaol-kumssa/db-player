@@ -41,6 +41,12 @@ for (const path of PAGES) {
   const missed = want.filter((c) => !seen.has(c));
   check(path, 'Tab reaches every control', !missed.length, missed.length ? `missed: ${missed.join(', ')}` : `${want.length} controls`);
 
+  // 1b. Targets at least 44 × 44 CSS px (Savanna's root font is 14 px, so rem alone is not enough)
+  const small = await page.evaluate(() => [...document.querySelector('db-player').shadowRoot.querySelectorAll('button, input.seek')]
+    .filter((b) => b.offsetParent && !b.closest('.lines')).map((b) => { const r = b.getBoundingClientRect(); return { c: b.className || b.textContent.trim().slice(0, 12), w: r.width, h: r.height }; })
+    .filter((x) => x.h < 43.5 || (x.w < 43.5 && x.c !== 'seek')));
+  check(path, 'Every control is at least 44 × 44 px', !small.length, small.map((x) => `${x.c} ${x.w.toFixed(0)}×${x.h.toFixed(0)}`).join(', '));
+
   // 2. K on the video plays
   await page.locator(`${P} video.main`).focus();
   await page.keyboard.press('k');
