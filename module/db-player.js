@@ -85,7 +85,7 @@ video.main:focus-visible{outline:3px solid #f5a300;outline-offset:-3px}
 .sign video{display:block;width:100%}
 .sign.tl{top:.5rem;inset-inline-start:.5rem}.sign.tr{top:.5rem;inset-inline-end:.5rem}
 .sign.bl{bottom:.5rem;inset-inline-start:.5rem}.sign.br{bottom:.5rem;inset-inline-end:.5rem}
-.adtext{margin:.75rem 0 0;padding:.75rem 1rem;border-inline-start:.25rem solid var(--accent);background:var(--soft);color:#1a1a1a;border-radius:0 var(--r) var(--r) 0}
+.describe-text{margin:.75rem 0 0;padding:.75rem 1rem;border-inline-start:.25rem solid var(--accent);background:var(--soft);color:#1a1a1a;border-radius:0 var(--r) var(--r) 0}
 .langrow{display:flex;justify-content:flex-end;margin-bottom:.5rem}
 :host([data-page-lang]) .langrow{display:none} /* the host page has one switch for everything (page-i18n.js) */
 .seekrow{display:flex;align-items:center;gap:.75rem;margin-top:.75rem}
@@ -139,7 +139,7 @@ dt{font-weight:600}dd{margin:0}
     <div class="sign br" hidden><video class="signv" muted playsinline preload="metadata" aria-hidden="true" tabindex="-1"></video></div>
   </div>
   <div class="capbelow" hidden></div>
-  <p class="adtext" hidden></p>
+  <p class="describe-text" hidden></p>
   <p class="err" role="alert" hidden></p>
   <div class="seekrow">
     <input type="range" class="seek" min="0" max="1000" step="1" value="0" data-label="seek">
@@ -153,7 +153,7 @@ dt{font-weight:600}dd{margin:0}
     <button type="button" class="b-cc" aria-pressed="true"><span class="ico" aria-hidden="true">CC</span> <span data-t="captions"></span></button>
     <button type="button" class="b-ccset" aria-haspopup="dialog"><span data-t="captionSettings"></span></button>
     <button type="button" class="b-tr" aria-expanded="false"><span data-t="transcript"></span></button>
-    <button type="button" class="b-ad" aria-pressed="false"><span class="ico" aria-hidden="true">AD</span> <span data-t="ad"></span></button>
+    <button type="button" class="b-describe" aria-pressed="false"><span class="ico" aria-hidden="true">AD</span> <span data-t="ad"></span></button>
     <button type="button" class="b-quiet" aria-pressed="false"><span data-t="quiet"></span></button>
     <button type="button" class="b-sign"><span data-t="sign"></span></button>
     <button type="button" class="b-fs"></button>
@@ -423,7 +423,7 @@ dt{font-weight:600}dd{margin:0}
       const resume = !v.paused;
       this.adBusy = true;
       v.pause();
-      const box = this.$('.adtext');
+      const box = this.$('.describe-text');
       box.textContent = text; box.lang = this.uiLang; box.hidden = false;
       const done = () => { if (!this.adBusy) return; this.adBusy = false; if (resume) v.play().catch(() => {}); };
       const words = text.split(/\s+/).length;
@@ -450,7 +450,7 @@ dt{font-weight:600}dd{margin:0}
       host.style.setProperty('--cap-op', p.bg === 'soft' ? '.6' : '1');
       this.$('.cap').classList.toggle('top', p.pos === 'top');
       this.$('.b-cc').setAttribute('aria-pressed', String(!!p.captions));
-      this.$('.b-ad').setAttribute('aria-pressed', String(!!p.ad));
+      this.$('.b-describe').setAttribute('aria-pressed', String(!!p.ad));
       this.$('.b-quiet').setAttribute('aria-pressed', String(!!p.quiet));
       this.$('video.main').playbackRate = p.rate;
       for (const [k, sel] of [['capLang', '#f-lang'], ['size', '#f-size'], ['color', '#f-color'], ['bg', '#f-bg'], ['pos', '#f-pos']]) this.$(sel).value = p[k];
@@ -460,13 +460,13 @@ dt{font-weight:600}dd{margin:0}
       sign.style.setProperty('--sign-w', SIGN_SIZES[p.signSize] || SIGN_SIZES.m);
       const bs = this.$('.b-sign');
       if (this.hasSign) {
+        bs.hidden = false;
         bs.setAttribute('aria-pressed', String(!!p.signOn));
         sign.hidden = !p.signOn;
         this.$('.signtools').hidden = !p.signOn;
         this.$$('.signtools [data-pos]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pos === p.signPos)));
       } else {
-        bs.setAttribute('aria-expanded', String(!this.$('.nosign').hidden));
-        bs.setAttribute('aria-controls', this.$('.nosign').id);
+        bs.hidden = true; // no sign-language video for this lesson yet: no button (it appears when sign="..." is set)
       }
       this.drawCaption();
       this.refreshLabels();
@@ -533,11 +533,11 @@ dt{font-weight:600}dd{margin:0}
         this.prefs.captions = !this.prefs.captions; this.applyPrefs();
         this.say(this.prefs.captions ? this.t.captionsOn : this.t.captionsOff);
       });
-      this.$('.b-ad').addEventListener('click', () => {
+      this.$('.b-describe').addEventListener('click', () => {
         this.prefs.ad = !this.prefs.ad; this.adLast = null; this.applyPrefs();
         let m = this.prefs.ad ? this.t.adOn : this.t.adOff;
         if (this.prefs.ad && !this.voiceFor(this.uiLang)) m += ` ${this.t.adNoVoice}`;
-        if (!this.prefs.ad) { this.$('.adtext').hidden = true; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+        if (!this.prefs.ad) { this.$('.describe-text').hidden = true; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
         this.say(m);
       });
       this.$('.b-lang').addEventListener('click', async () => {
@@ -614,7 +614,7 @@ dt{font-weight:600}dd{margin:0}
       });
 
       // media state
-      v.addEventListener('play', () => { this.refreshLabels(); this.$('.adtext').hidden = true; if (this.hasSign && this.prefs.signOn) this.syncSign(true); });
+      v.addEventListener('play', () => { this.refreshLabels(); this.$('.describe-text').hidden = true; if (this.hasSign && this.prefs.signOn) this.syncSign(true); });
       v.addEventListener('pause', () => { this.refreshLabels(); this.$('.signv').pause(); });
       v.addEventListener('seeked', () => { this.syncSign(false); this.adLast = null; this.highlightTranscript(v.currentTime); });
       v.addEventListener('ratechange', () => { this.$('.signv').playbackRate = v.playbackRate; });
