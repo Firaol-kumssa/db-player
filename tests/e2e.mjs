@@ -27,8 +27,8 @@ for (const path of PAGES) {
 
   // 1. Tab through every control
   const want = await page.evaluate(() => [...document.querySelector('db-player').shadowRoot
-    .querySelectorAll('video.main, input.seek, .bar button, .b-off')].filter((e) => e.offsetParent || e.tagName === 'VIDEO').map((e) => e.className));
-  await page.locator(`${P} video.main`).focus();
+    .querySelectorAll('.b-lang, video.main, input.seek, .bar button, .b-off')].filter((e) => e.offsetParent || e.tagName === 'VIDEO').map((e) => e.className));
+  await page.locator(`${P} .b-lang`).focus(); // first control in the player
   const seen = new Set();
   for (let i = 0; i < 40 && seen.size < want.length; i++) {
     const cls = await page.evaluate(() => {
@@ -123,6 +123,25 @@ for (const path of PAGES) {
   await page.locator(`${P} .b-cc`).click();
   await page.locator(`${P} .b-quiet`).click();
   check(path, 'Quiet mode silences the player\'s announcements', qOn === 'true' && first && after === first, `pressed=${qOn}, live region kept "${first.slice(0, 25)}…"`);
+
+  // 6c. Language switch: Amharic -> English (labels, captions, transcript), remembered after reload, and back
+  const ui = () => page.evaluate(() => { const r = document.querySelector('db-player').shadowRoot;
+    return { lang: r.querySelector('.wrap').lang, play: r.querySelector('.b-play .lbl').textContent, sw: r.querySelector('.b-lang').textContent,
+      swLang: r.querySelector('.b-lang').lang, cap: r.querySelector('#f-lang').value, line: r.querySelector('.lines button')?.lang }; });
+  const am = await ui();
+  await page.locator(`${P} .b-lang`).click();
+  await page.waitForFunction(() => document.querySelector('db-player').shadowRoot.querySelector('.lines button')?.lang === 'en');
+  const en = await ui();
+  await page.reload({ waitUntil: 'load' });
+  await page.locator(`${P} .b-play .lbl`).filter({ hasText: /\S/ }).waitFor();
+  const kept = await ui();
+  check(path, 'Language switch: Amharic → English, remembered after reload',
+    am.lang === 'am' && am.sw === 'English' && am.swLang === 'en' && en.lang === 'en' && en.play === 'Play' && en.sw === 'አማርኛ' && en.cap === 'en' && en.line === 'en' && kept.lang === 'en',
+    `${am.play} → ${en.play}; captions ${am.cap} → ${en.cap}; after reload ${kept.lang}`);
+  await page.locator(`${P} .b-lang`).click();
+  await page.waitForTimeout(300);
+  const back = await ui();
+  check(path, 'Language switch: back to Amharic', back.lang === 'am' && back.cap === 'am' && back.sw === 'English', back.play);
 
   // reset prefs for the next page
   await page.evaluate(() => localStorage.removeItem('db-player:prefs'));
