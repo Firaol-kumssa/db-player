@@ -80,7 +80,7 @@ document.addEventListener('db-player:complete', () => markLessonDone());
 - Keyboard: K or Space (on the video) plays and pauses, the arrows move 5 s, Tab moves between controls and Escape closes dialogs. Shortcuts work only while focus is inside the player (WCAG 2.1.4). They are listed in a real `<dialog>`.
 - Captions: the VTT tracks are set to `mode = 'hidden'`, and the player reads `cuechange` and draws cues itself. The learner chooses size (4), colours (3), background (solid or see-through) and position (top, bottom, or **below the video**, which is best at 200% zoom on a phone). The choice is remembered and announced.
 - Transcript: built from the same VTT. Every line is a button that jumps to its time, the current line is marked `aria-current`, and the whole transcript downloads as text.
-- Language: a button above the video, labelled in the other language ("English" or "አማርኛ", with its own `lang` so screen readers pronounce it correctly), switches every label, the captions, the transcript and the audio description between Amharic and English. The choice is saved in `localStorage` and survives a reload. If the host page changes its `lang` attribute later, the host wins.
+- Language: a button above the video, labelled in the other language ("English" or "አማርኛ", with its own `lang` so screen readers pronounce it correctly), switches every label, the captions, the transcript and the audio description between Amharic and English. The choice is saved and survives a reload. When the host page uses the page-wide switch (below), the player hides this button so there is only one switch, and follows the page instead.
 - Quiet mode: a toggle button that makes the player stop speaking (no audio-description voice) and stop sending announcements such as "Captions on" to the screen reader. It gives one last announcement first, and errors are still announced. A web page can't switch TalkBack itself off: on Android, hold both volume keys for 3 seconds (if the TalkBack shortcut is on) or go to Settings › Accessibility › TalkBack.
 - Audio description: when switched on, the video pauses at each description, reads it with `speechSynthesis` (am-ET), then resumes. If the phone has no Amharic voice, the text is shown on screen and sent to the screen reader through a live region.
 - Sign language: a second `<video>` kept in sync on play, pause, seeking and rate change, with drift corrected once a second. It moves with four position buttons and resizes with Larger/Smaller. No dragging.
@@ -124,6 +124,24 @@ Not built at Level 2: authentication on the upload (anyone who can reach port 80
 Not attempted.
 
 ## Languages
+
+### Whole-page Amharic / English switch
+
+`module/page-i18n.js` (5 KB, no dependencies) adds one **English / አማርኛ** button to the top right of the host page. It sits inside Savanna's fixed header, or floats top right on other pages. One tap switches:
+
+- **the whole Savanna page**: header, sidebar, lesson text, buttons, footer, image descriptions (`alt`, `title`, `aria-label`) and the tab title
+- **`<html lang>`**, so TalkBack and other screen readers change voice
+- **the player**: labels, captions, transcript and audio description
+
+It works in both directions, and the player's own language button switches the page too (event `db-player:lang`). The choice is kept in `localStorage` (`db-page-lang`), and the page starts in Amharic.
+
+```html
+<script src="/module/page-i18n.js" defer data-dict="/module/i18n/pages/concept-with-navigation.am.json"></script>
+```
+
+The Savanna HTML files are **not changed** to do this. The script swaps text at runtime using a dictionary (`module/i18n/pages/concept-with-navigation.am.json`: English text to Amharic, 130 entries), and it is loaded from our one mount block. Not translated: the course code "VA-1", names, and Savanna's hidden Markdown help for course editors, which learners never see. **The page translation is a draft by the developer and needs a check by a native speaker.** Some sentences are split around bold words in the HTML, so their Amharic word order was adapted piece by piece.
+
+### Adding a language
 
 All text lives in `module/i18n/am.json` and `en.json` (identical keys, checked by a test). To add Afaan Oromo, copy `en.json` to `om.json`, translate it, and set `lang="om"`. The CSS uses logical properties (`inset-inline-start`), and the `dir` key in each JSON file supports right-to-left languages such as Arabic. Amharic text gets line-height 1.7.
 
@@ -184,8 +202,8 @@ Results from 15 November 2026 are saved in `tests/results/`.
 **End-to-end (`tests/e2e.mjs`), 33 of 34 checks pass**, on both `demo/blank.html` and the Savanna page:
 
 - No console errors from db-player.
-- Tab reaches all 16 controls.
-- The language button switches to English (labels, captions, transcript), the choice survives a reload, and the button switches back.
+- Tab reaches every player control (15; the player's own language button is hidden because the page switch is present).
+- The page-wide switch (top right) turns the page **and** the player from Amharic to English (`<html lang>`, labels, captions, transcript), is at least 44 × 44 px, survives a reload, and switches back.
 - Quiet mode makes one last announcement, then the live region stays silent.
 - Every control is at least 44 × 44 px.
 - K on the video plays it.

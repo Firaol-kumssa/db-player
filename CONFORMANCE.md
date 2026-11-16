@@ -29,7 +29,7 @@ Scope: the `<db-player>` module only (not the Savanna host page). Version 1.1, 1
 | 2.4.11 Focus not obscured (minimum) | Supports | No sticky elements. |
 | 2.5.7 Dragging movements | Supports | Sign window: position and size buttons only. The seek slider also works with arrow keys and the ±10 s buttons. |
 | 2.5.8 Target size (minimum) | Supports | All controls are at least 44 × 44 CSS px (`max(2.75rem, 44px)`, because Savanna's root font is 14 px). The e2e test checks this on both pages. |
-| 3.1.1 Language of page | Supports | `lang` on the component root. |
+| 3.1.1 Language of page | Supports | `lang` on the component root. The page-wide switch also sets `<html lang>` (am or en), so screen readers change voice with the page. |
 | 3.1.2 Language of parts | Supports | Captions and transcript lines carry their own `lang`. The language button is labelled in the target language and has `lang` set to match ("English" `lang=en`, "አማርኛ" `lang=am`). |
 | 3.2.1 / 3.2.2 On focus, on input | Supports | Settings apply on change, with no context change, and are announced. |
 | 3.2.6 Consistent help | Supports | Keyboard help is always in the same place. |
@@ -40,8 +40,8 @@ Scope: the `<db-player>` module only (not the Savanna host page). Version 1.1, 1
 ## Who tested, how, and what they could not do
 
 - Automated (15 November 2026, Chrome 157 via Playwright, on `demo/blank.html` and the Savanna page; `npm run test:e2e`), 33 of 34 checks pass:
-  - Tab reaches all 16 controls.
-  - The Amharic/English switch works and is remembered.
+  - Tab reaches every player control.
+  - The page-wide Amharic/English switch (top right) changes the page and the player, is at least 44 × 44 px, and is remembered. axe, strict mode: 0 issues on that button in either language.
   - Quiet mode silences the player's own announcements.
   - Every control is at least 44 × 44 px.
   - K plays the video.
