@@ -64,12 +64,12 @@
   --surface:var(--bs-body-bg,#fff);
   --soft:var(--bs-tertiary-bg,#f8f9fa);
   --hover:var(--bs-primary-bg-subtle,#e8eef5);
-  --muted:#5c636a;
+  --muted:#3d4349;
   --r:var(--bs-border-radius,.375rem);
   --r-lg:var(--bs-border-radius-lg,.5rem);
   --tap:max(2.75rem,44px);
   --focus:var(--p)}
-@supports (color:color-mix(in srgb,red,blue)){:host{--p:var(--db-player-primary,color-mix(in srgb,var(--accent) 80%,#000))}}
+@supports (color:color-mix(in srgb,red,blue)){:host{--p:var(--db-player-primary,color-mix(in srgb,var(--accent) 70%,#000))}}
 :host([hidden]){display:none}
 .wrap[lang=am]{line-height:1.7}
 *{box-sizing:border-box}
@@ -92,7 +92,7 @@ video.main:focus-visible{outline:3px solid #f5a300;outline-offset:-3px}
 .bar,.signtools{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
 button,select{font:inherit;font-size:1rem}
 button{min-height:var(--tap);min-width:var(--tap);padding:.375rem .875rem;border-radius:var(--r);border:1px solid var(--accent);background:var(--surface);color:var(--p);cursor:pointer;line-height:1.3;font-weight:500;transition:background-color .15s,color .15s,border-color .15s}
-button:hover{background:var(--hover);border-color:var(--p)}
+button:hover{background:var(--soft);border-color:var(--p)}
 button.primary,button[aria-pressed=true]{background:var(--p);border-color:var(--p);color:#fff}
 button.primary:hover,button[aria-pressed=true]:hover{background:color-mix(in srgb,var(--p) 85%,#000)}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -103,7 +103,7 @@ button.primary:hover,button[aria-pressed=true]:hover{background:color-mix(in srg
 .offline p{margin:.5rem 0 0}
 .offline a{color:var(--p);font-weight:600;display:inline-block;margin-top:.5rem;min-height:1.5rem;text-underline-offset:.2em}
 .err{color:#b00020;font-weight:600;margin:.5rem 0 0}
-.tr h3,dialog h3{font-size:1.5rem;font-weight:500;line-height:1.2;margin:0 0 .5rem;color:inherit}
+.tr h2,dialog h2{font-size:1.5rem;font-weight:500;line-height:1.2;margin:0 0 .5rem;color:inherit}
 .lines{list-style:none;margin:.75rem 0 0;padding:0;max-height:18rem;overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:#fff}
 .lines li+li{border-top:1px solid var(--line)}
 .lines button{display:flex;gap:.75rem;width:100%;text-align:start;border:0;border-radius:0;background:#fff;color:#1a1a1a;font-weight:400;padding:.5rem .875rem}
@@ -151,6 +151,7 @@ dt{font-weight:600}dd{margin:0}
     <button type="button" class="b-ccset" aria-haspopup="dialog"><span data-t="captionSettings"></span></button>
     <button type="button" class="b-tr" aria-expanded="false"><span data-t="transcript"></span></button>
     <button type="button" class="b-ad" aria-pressed="false"><span class="ico" aria-hidden="true">AD</span> <span data-t="ad"></span></button>
+    <button type="button" class="b-quiet" aria-pressed="false"><span data-t="quiet"></span></button>
     <button type="button" class="b-sign"><span data-t="sign"></span></button>
     <button type="button" class="b-fs"></button>
     <button type="button" class="b-help" aria-haspopup="dialog"><span data-t="help"></span></button>
@@ -170,7 +171,7 @@ dt{font-weight:600}dd{margin:0}
     <a class="offlink" hidden data-t="offlineOpen"></a>
   </div>
   <section class="panel tr" hidden>
-    <h3 class="trh" data-t="transcript"></h3>
+    <h2 class="trh" data-t="transcript"></h2>
     <p class="hint" data-t="transcriptHint"></p>
     <button type="button" class="b-dl" data-t="download"></button>
     <ol class="lines"></ol>
@@ -178,7 +179,7 @@ dt{font-weight:600}dd{margin:0}
   <div class="sr" role="status" aria-live="polite"></div>
   <dialog class="d-set">
     <form method="dialog">
-      <h3 class="dsh" data-t="captionSettings"></h3>
+      <h2 class="dsh" data-t="captionSettings"></h2>
       <label for="f-lang" data-t="captionLanguage"></label><select id="f-lang" name="capLang"></select>
       <label for="f-size" data-t="size"></label>
       <select id="f-size" name="size"><option value="s" data-t="sizeS"></option><option value="m" data-t="sizeM"></option><option value="l" data-t="sizeL"></option><option value="xl" data-t="sizeXL"></option></select>
@@ -193,7 +194,7 @@ dt{font-weight:600}dd{margin:0}
     </form>
   </dialog>
   <dialog class="d-help">
-    <h3 class="dhh" data-t="helpTitle"></h3>
+    <h2 class="dhh" data-t="helpTitle"></h2>
     <dl>
       <dt data-t="keyPlayName"></dt><dd data-t="keyPlay"></dd>
       <dt data-t="keyArrowsName"></dt><dd data-t="keyArrows"></dd>
@@ -213,7 +214,7 @@ dt{font-weight:600}dd{margin:0}
     constructor() {
       super();
       this.prefs = Object.assign({ captions: true, capLang: '', size: 'm', color: 'white', bg: 'solid', pos: 'bottom',
-        rate: 1, ad: false, signOn: true, signPos: 'br', signSize: 'm' }, readPrefs());
+        rate: 1, ad: false, quiet: false, signOn: true, signPos: 'br', signSize: 'm' }, readPrefs());
       this.t = {};
       this.cues = [];
       this.lastProgress = -1;
@@ -225,7 +226,8 @@ dt{font-weight:600}dd{margin:0}
     $(s) { return this.shadowRoot.querySelector(s); }
     $$(s) { return [...this.shadowRoot.querySelectorAll(s)]; }
     emit(name, detail = {}) { this.dispatchEvent(new CustomEvent(`db-player:${name}`, { bubbles: true, composed: true, detail })); }
-    say(msg) { const sr = this.$('.sr'); sr.textContent = ''; setTimeout(() => { sr.textContent = msg; }, 50); }
+    // Quiet mode: the player stops speaking and stops sending announcements to the screen reader (errors still use role=alert).
+    say(msg, force = false) { if (this.prefs.quiet && !force) return; const sr = this.$('.sr'); sr.textContent = ''; setTimeout(() => { sr.textContent = msg; }, 50); }
 
     async connectedCallback() {
       if (this.shadowRoot) return;
@@ -409,7 +411,7 @@ dt{font-weight:600}dd{margin:0}
       box.textContent = text; box.lang = this.uiLang; box.hidden = false;
       const done = () => { if (!this.adBusy) return; this.adBusy = false; if (resume) v.play().catch(() => {}); };
       const words = text.split(/\s+/).length;
-      const voice = this.voiceFor(this.uiLang);
+      const voice = this.prefs.quiet ? null : this.voiceFor(this.uiLang); // quiet: text on screen only
       if (voice) {
         const u = new SpeechSynthesisUtterance(text);
         u.lang = VOICE_LANG[this.uiLang]; u.voice = voice;
@@ -433,6 +435,7 @@ dt{font-weight:600}dd{margin:0}
       this.$('.cap').classList.toggle('top', p.pos === 'top');
       this.$('.b-cc').setAttribute('aria-pressed', String(!!p.captions));
       this.$('.b-ad').setAttribute('aria-pressed', String(!!p.ad));
+      this.$('.b-quiet').setAttribute('aria-pressed', String(!!p.quiet));
       this.$('video.main').playbackRate = p.rate;
       for (const [k, sel] of [['capLang', '#f-lang'], ['size', '#f-size'], ['color', '#f-color'], ['bg', '#f-bg'], ['pos', '#f-pos']]) this.$(sel).value = p[k];
       // sign window
@@ -520,6 +523,12 @@ dt{font-weight:600}dd{margin:0}
         if (this.prefs.ad && !this.voiceFor(this.uiLang)) m += ` ${this.t.adNoVoice}`;
         if (!this.prefs.ad) { this.$('.adtext').hidden = true; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
         this.say(m);
+      });
+      this.$('.b-quiet').addEventListener('click', () => {
+        const on = !this.prefs.quiet;
+        if (on && 'speechSynthesis' in window) speechSynthesis.cancel();
+        this.say(on ? this.t.quietOn : this.t.quietOff, true); // last announcement before going quiet
+        this.prefs.quiet = on; this.applyPrefs();
       });
       this.$('.b-tr').addEventListener('click', (e) => {
         const tr = this.$('.tr'); tr.hidden = !tr.hidden;
