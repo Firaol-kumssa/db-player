@@ -13,10 +13,10 @@ Scope: the `<db-player>` module only (not the Savanna host page). Version 1.1, 1
 | 1.3.2 Meaningful sequence | Supports | DOM order matches visual order. |
 | 1.4.1 Use of colour | Supports | Pressed state uses `aria-pressed` plus a fill change, and the current transcript line has a side bar. |
 | 1.4.2 Audio control | Supports | No autoplay. |
-| 1.4.3 Contrast (minimum) | Supports | Default palette ≥ 4.5:1. The host's `--bs-primary` is darkened 20% inside the shadow root. On Savanna, `#db3e3e` (4.40:1) becomes `#af3232` (6.3:1). axe color-contrast: 0 issues in the player. |
+| 1.4.3 Contrast (minimum) | Supports | The player takes Savanna's theme, but the brand red `#db3e3e` (4.40:1) is never used for text. Text and filled buttons use a 20% darker shade, `#af3232`: 6.32:1 on white, 4.75:1 on the hover background. Other text is 6.09:1 or more. Without `color-mix` the fallback is navy `#002b56`. axe color-contrast: 0 issues in the player on both pages. |
 | 1.4.4 Resize text | Supports | rem units, tested at 200%. |
 | 1.4.10 Reflow | Supports | No sideways scroll at 320 px: on `demo/blank.html` the scrollWidth is 320. On Savanna the player sits within 25–296 px, but the page is 480 px wide because of Savanna's own header (a host issue). The "below the video" caption position helps here. |
-| 1.4.11 Non-text contrast | Supports | 2 px borders on controls and a 3 px focus outline (#f5a300). |
+| 1.4.11 Non-text contrast | Supports | Button borders use the exact host red: 4.40:1 on white (3:1 needed). Select borders `#6c757d` are 4.69:1. The 3 px focus outline uses the dark shade (6.32:1); on the video it is `#f5a300` on black. |
 | 1.4.12 Text spacing | Supports | No fixed heights on text containers. |
 | 1.4.13 Content on hover or focus | Supports | No hover-only content. |
 | 2.1.1 Keyboard | Supports | Every function is a button, select or range input. Tested with Tab only (automated). |
@@ -25,10 +25,10 @@ Scope: the `<db-player>` module only (not the Savanna host page). Version 1.1, 1
 | 2.2.2 Pause, stop, hide | Supports | Nothing moves by itself. Audio description pauses the video. |
 | 2.4.3 Focus order | Supports | Video, position slider, controls, panels. |
 | 2.4.6 Headings and labels | Supports | |
-| 2.4.7 Focus visible | Supports | `:focus-visible` with a 3 px outline. |
+| 2.4.7 Focus visible | Supports | `:focus-visible` with a 3 px outline, 2 px offset. |
 | 2.4.11 Focus not obscured (minimum) | Supports | No sticky elements. |
 | 2.5.7 Dragging movements | Supports | Sign window: position and size buttons only. The seek slider also works with arrow keys and the ±10 s buttons. |
-| 2.5.8 Target size (minimum) | Supports | All controls are at least 44 × 44 CSS px. |
+| 2.5.8 Target size (minimum) | Supports | All controls are at least 44 × 44 CSS px (`max(2.75rem, 44px)`, because Savanna's root font is 14 px). The e2e test checks this on both pages. |
 | 3.1.1 Language of page | Supports | `lang` on the component root. |
 | 3.1.2 Language of parts | Supports | Captions and transcript lines carry their own `lang`. |
 | 3.2.1 / 3.2.2 On focus, on input | Supports | Settings apply on change, with no context change, and are announced. |
@@ -39,8 +39,9 @@ Scope: the `<db-player>` module only (not the Savanna host page). Version 1.1, 1
 
 ## Who tested, how, and what they could not do
 
-- Automated (15 November 2026, Chrome 157 via Playwright, on `demo/blank.html` and the Savanna page; `npm run test:e2e`), 25 of 26 checks pass:
+- Automated (15 November 2026, Chrome 157 via Playwright, on `demo/blank.html` and the Savanna page; `npm run test:e2e`), 27 of 28 checks pass:
   - Tab reaches all 14 controls.
+  - Every control is at least 44 × 44 px.
   - K plays the video.
   - A transcript line seeks to the right time.
   - Audio description pauses the video and resumes it.

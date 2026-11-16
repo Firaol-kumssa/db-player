@@ -50,7 +50,17 @@ nginx serves the untouched Savanna starter as the site root and our `module/`, `
 | `lang` | `am` (default) or `en`. Interface language |
 | `poster`, `lesson-title` | Optional |
 
-The player takes the host's look from `--bs-primary`, `--bs-body-font-family` and `--bs-body-color`, with fallbacks. All its CSS lives in a shadow root, so it doesn't restyle the host page and the host doesn't restyle it.
+**Theming.** All the player's CSS lives in a shadow root, so it doesn't restyle the host page and the host doesn't restyle it. It reads the host's look through CSS variables, which pass into the shadow root:
+
+| Variable | Used for | Fallback |
+|---|---|---|
+| `--savanna-theme-primary`, then `--bs-primary` | Accent, used only for decoration: button borders, panel bars, the current transcript line | `#002b56` |
+| `--db-player-primary` | Text and filled-button colour. Set it if your brand colour is too light | 20% darker than the accent (`color-mix`), or `#002b56` |
+| `--bs-body-font-family` | Font (Ethiopic fonts are added after it for Amharic) | `system-ui` |
+| `--bs-border-color`, `--bs-border-radius`, `--bs-border-radius-lg` | Panel and list lines, corners | `#dee2e6`, `.375rem`, `.5rem` |
+| `--bs-body-bg`, `--bs-tertiary-bg`, `--bs-primary-bg-subtle` | Button, panel and hover backgrounds | `#fff`, `#f8f9fa`, `#e8eef5` |
+
+Text colour is inherited from the host (on Savanna, the lesson's navy). Targets are `max(2.75rem, 44px)`, because Savanna's root font size is 14 px and `2.75rem` alone would be only 38.5 px there.
 
 | Event (bubbles, composed) | Detail |
 |---|---|
@@ -168,10 +178,11 @@ BASE=http://localhost:8080 npm run slow3g     # Slow 3G load time and KB
 
 Results from 15 November 2026 are saved in `tests/results/`.
 
-**End-to-end (`tests/e2e.mjs`), 25 of 26 checks pass**, on both `demo/blank.html` and the Savanna page:
+**End-to-end (`tests/e2e.mjs`), 27 of 28 checks pass**, on both `demo/blank.html` and the Savanna page:
 
 - No console errors from db-player.
 - Tab reaches all 14 controls.
+- Every control is at least 44 × 44 px.
 - K on the video plays it.
 - The transcript line "0:10" seeks to 10.41 s and is marked `aria-current`.
 - With audio description on, the video pauses at 10.06 s on "ስላይድ 2 ከ7…" and plays again afterwards.
@@ -201,7 +212,17 @@ Results from 15 November 2026 are saved in `tests/results/`.
 | — | reflow | Header is 480 px wide at a 320 px viewport (WCAG 1.4.10) |
 | — | 404 | `/favicon_alx.ico` |
 
-**Contrast on Savanna:** Savanna's `--bs-primary` is `#db3e3e`, which is only 4.40:1 on white. Inside the shadow root the player now uses `color-mix(in srgb, var(--bs-primary) 80%, #000)`, which gives `#af3232`, 6.3:1 for the outlined buttons and for white text on the filled ones. Browsers without `color-mix` fall back to the host colour unchanged.
+**Contrast on Savanna:** Savanna's red `#db3e3e` is only 4.40:1 on white, so the player uses it only for decoration: 1 px button borders (non-text, which needs 3:1), panel bars and the marker on the current transcript line. Text, filled buttons and the focus outline use `color-mix(in srgb, <red> 80%, #000)`, which gives `#af3232`. Browsers without `color-mix` use navy `#002b56` instead. Measured on the Savanna page:
+
+| Pair | Ratio |
+|---|---|
+| Button text / white, white / filled button, focus outline / white | 6.32:1 |
+| Button text on hover background (`#f8d8d8`) | 4.75:1 |
+| Time stamp on the current transcript line | 6.09:1 |
+| Button border (exact red) / white | 4.40:1 (non-text) |
+| Select border / white | 4.69:1 (non-text) |
+
+Before and after screenshots at 1280 px and 412 px are in `tests/results/theme/` (`TAG=after node tests/screens.mjs`).
 
 ## Finished and not finished
 
