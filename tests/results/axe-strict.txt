@@ -1,0 +1,15 @@
+
+== /demo/blank.html: 40 rules passed, 0 rules with violations
+
+== /pages/concept-with-navigation.html: 46 rules passed, 9 rules with violations
+  [critical] aria-allowed-attr: Elements must only use supported ARIA attributes — db-player: 0, host page: 1
+  [serious] aria-hidden-focus: ARIA hidden element must not be focusable or contain focusable elements — db-player: 0, host page: 7
+  [serious] aria-progressbar-name: ARIA progressbar nodes must have an accessible name — db-player: 0, host page: 1
+  [serious] color-contrast-enhanced: Elements must meet enhanced color contrast ratio thresholds — db-player: 0, host page: 10
+  [serious] color-contrast: Elements must meet minimum color contrast ratio thresholds — db-player: 0, host page: 7
+  [moderate] heading-order: Heading levels should only increase by one — db-player: 0, host page: 1
+  [serious] link-name: Links must have discernible text — db-player: 0, host page: 1
+  [serious] list: <ul> and <ol> must only directly contain <li>, <script> or <template> elements — db-player: 0, host page: 1
+  [moderate] region: All page content should be contained by landmarks — db-player: 0, host page: 9
+
+Critical/serious issues inside db-player: 0

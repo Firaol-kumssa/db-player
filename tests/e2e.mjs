@@ -111,6 +111,19 @@ for (const path of PAGES) {
     check(path, `${dlg} opens, Escape closes, focus returns to ${btn}`, open && closed && back);
   }
 
+  // 6b. Quiet mode: one last announcement, then the live region stays silent
+  const sr = () => page.evaluate(() => document.querySelector('db-player').shadowRoot.querySelector('.sr').textContent);
+  await page.locator(`${P} .b-quiet`).click();
+  await page.waitForTimeout(200);
+  const qOn = await page.locator(`${P} .b-quiet`).getAttribute('aria-pressed');
+  const first = await sr();
+  await page.locator(`${P} .b-cc`).click();
+  await page.waitForTimeout(200);
+  const after = await sr();
+  await page.locator(`${P} .b-cc`).click();
+  await page.locator(`${P} .b-quiet`).click();
+  check(path, 'Quiet mode silences the player\'s announcements', qOn === 'true' && first && after === first, `pressed=${qOn}, live region kept "${first.slice(0, 25)}…"`);
+
   // reset prefs for the next page
   await page.evaluate(() => localStorage.removeItem('db-player:prefs'));
 
