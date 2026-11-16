@@ -39,7 +39,7 @@ Scope: the `<db-player>` module only (not the Savanna host page). Version 1.1, 1
 
 ## Who tested, how, and what they could not do
 
-- Automated (15 November 2026, Chrome 157 via Playwright, on `demo/blank.html` and the Savanna page; `npm run test:e2e`), 33 of 34 checks pass:
+- Automated (15 November 2026, Chrome 157 via Playwright, on `demo/blank.html` and the Savanna page; `npm run test:e2e`), 35 of 36 checks pass:
   - Tab reaches every player control.
   - The page-wide Amharic/English switch (top right) changes the page and the player, is at least 44 × 44 px, and is remembered. axe, strict mode: 0 issues on that button in either language.
   - Quiet mode silences the player's own announcements.

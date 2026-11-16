@@ -135,6 +135,8 @@ Not attempted.
 
 It works in both directions, and the player's own language button switches the page too (event `db-player:lang`). The choice is kept in `localStorage` (`db-page-lang`), and the page starts in Amharic.
 
+It keeps working when the host page changes itself: a `MutationObserver` translates any text Savanna adds or rewrites later (pop-ups, menus, redrawn headers), and the button puts itself back if the header is rebuilt. It is a real `<button>`, 44 × 44 px, reached with 2 Tab presses from the top of the page, and works with Enter and Space. Screen readers hear "English (የገጹን ቋንቋ ቀይር)" or "አማርኛ (change page language)", with each part in its own language. Tested by `npm run test:page-lang`: 10 of 10 checks pass (keyboard, scrolling, late and rewritten content, a rebuilt header, fast toggling).
+
 ```html
 <script src="/module/page-i18n.js" defer data-dict="/module/i18n/pages/concept-with-navigation.am.json"></script>
 ```
@@ -195,11 +197,12 @@ BASE=http://localhost:8080 npm run test:e2e   # real Chrome, both pages (needs d
 BASE=http://localhost:8080 npm run axe        # axe-core, WCAG 2.0–2.2 A/AA, shadow DOM included
 STRICT=1 BASE=http://localhost:8080 npm run axe   # also AAA and axe best-practice rules
 BASE=http://localhost:8080 npm run slow3g     # Slow 3G load time and KB
+BASE=http://localhost:8080 npm run test:page-lang   # whole-page Amharic/English switch, 10 checks
 ```
 
 Results from 15 November 2026 are saved in `tests/results/`.
 
-**End-to-end (`tests/e2e.mjs`), 33 of 34 checks pass**, on both `demo/blank.html` and the Savanna page:
+**End-to-end (`tests/e2e.mjs`), 35 of 36 checks pass**, on both `demo/blank.html` and the Savanna page:
 
 - No console errors from db-player.
 - Tab reaches every player control (15; the player's own language button is hidden because the page switch is present).
