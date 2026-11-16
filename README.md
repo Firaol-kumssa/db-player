@@ -55,7 +55,7 @@ nginx serves the untouched Savanna starter as the site root and our `module/`, `
 | Variable | Used for | Fallback |
 |---|---|---|
 | `--savanna-theme-primary`, then `--bs-primary` | Accent, used only for decoration: button borders, panel bars, the current transcript line | `#002b56` |
-| `--db-player-primary` | Text and filled-button colour. Set it if your brand colour is too light | 20% darker than the accent (`color-mix`), or `#002b56` |
+| `--db-player-primary` | Text and filled-button colour. Set it if your brand colour is too light | 30% darker than the accent (`color-mix`), or `#002b56` |
 | `--bs-body-font-family` | Font (Ethiopic fonts are added after it for Amharic) | `system-ui` |
 | `--bs-border-color`, `--bs-border-radius`, `--bs-border-radius-lg` | Panel and list lines, corners | `#dee2e6`, `.375rem`, `.5rem` |
 | `--bs-body-bg`, `--bs-tertiary-bg`, `--bs-primary-bg-subtle` | Button, panel and hover backgrounds | `#fff`, `#f8f9fa`, `#e8eef5` |
@@ -80,6 +80,7 @@ document.addEventListener('db-player:complete', () => markLessonDone());
 - Keyboard: K or Space (on the video) plays and pauses, the arrows move 5 s, Tab moves between controls and Escape closes dialogs. Shortcuts work only while focus is inside the player (WCAG 2.1.4). They are listed in a real `<dialog>`.
 - Captions: the VTT tracks are set to `mode = 'hidden'`, and the player reads `cuechange` and draws cues itself. The learner chooses size (4), colours (3), background (solid or see-through) and position (top, bottom, or **below the video**, which is best at 200% zoom on a phone). The choice is remembered and announced.
 - Transcript: built from the same VTT. Every line is a button that jumps to its time, the current line is marked `aria-current`, and the whole transcript downloads as text.
+- Quiet mode: a toggle button that makes the player stop speaking (no audio-description voice) and stop sending announcements such as "Captions on" to the screen reader. It gives one last announcement first, and errors are still announced. A web page can't switch TalkBack itself off: on Android, hold both volume keys for 3 seconds (if the TalkBack shortcut is on) or go to Settings › Accessibility › TalkBack.
 - Audio description: when switched on, the video pauses at each description, reads it with `speechSynthesis` (am-ET), then resumes. If the phone has no Amharic voice, the text is shown on screen and sent to the screen reader through a live region.
 - Sign language: a second `<video>` kept in sync on play, pause, seeking and rate change, with drift corrected once a second. It moves with four position buttons and resizes with Larger/Smaller. No dragging.
 - Offline: "Download for offline (0.3 MB)" shows the size before the learner taps. A service worker then keeps the low-bitrate audio, the captions and a light lesson page (`module/offline.html`).
@@ -173,15 +174,17 @@ npm install                                   # dev tools only: Playwright, axe-
 npm test                                      # 10 unit tests: VTT parsing, cue lookup, i18n keys, API caption validator
 BASE=http://localhost:8080 npm run test:e2e   # real Chrome, both pages (needs docker compose up and Google Chrome)
 BASE=http://localhost:8080 npm run axe        # axe-core, WCAG 2.0–2.2 A/AA, shadow DOM included
+STRICT=1 BASE=http://localhost:8080 npm run axe   # also AAA and axe best-practice rules
 BASE=http://localhost:8080 npm run slow3g     # Slow 3G load time and KB
 ```
 
 Results from 15 November 2026 are saved in `tests/results/`.
 
-**End-to-end (`tests/e2e.mjs`), 27 of 28 checks pass**, on both `demo/blank.html` and the Savanna page:
+**End-to-end (`tests/e2e.mjs`), 29 of 30 checks pass**, on both `demo/blank.html` and the Savanna page:
 
 - No console errors from db-player.
-- Tab reaches all 14 controls.
+- Tab reaches all 15 controls.
+- Quiet mode makes one last announcement, then the live region stays silent.
 - Every control is at least 44 × 44 px.
 - K on the video plays it.
 - The transcript line "0:10" seeks to 10.41 s and is marked `aria-current`.
@@ -199,6 +202,8 @@ Results from 15 November 2026 are saved in `tests/results/`.
 | `demo/blank.html` | 0 violations | 0 violations |
 | `pages/concept-with-navigation.html` | 0 violations (145 nodes in the shadow root checked) | 6 rules, listed below |
 
+**Strict scan** (`STRICT=1`: AA plus AAA, including 7:1 contrast, plus axe best-practice rules): **0 issues in db-player on both pages**; the blank page has 0 issues in total. Two things were fixed to get there: the text shade went from 6.3:1 to 7.7:1, and the panel and dialog headings changed from `<h3>` to `<h2>`, so they don't skip a level under the page's `<h1>`. On the Savanna page the strict scan also lists the starter's AAA contrast (10 nodes), its heading order (`<h1>` followed by `<h4>`) and content outside landmarks (9 nodes).
+
 **Issues that belong to the Savanna starter** (reported, not fixed, because we don't edit starter files):
 
 | Impact | Rule | Where |
@@ -212,13 +217,13 @@ Results from 15 November 2026 are saved in `tests/results/`.
 | — | reflow | Header is 480 px wide at a 320 px viewport (WCAG 1.4.10) |
 | — | 404 | `/favicon_alx.ico` |
 
-**Contrast on Savanna:** Savanna's red `#db3e3e` is only 4.40:1 on white, so the player uses it only for decoration: 1 px button borders (non-text, which needs 3:1), panel bars and the marker on the current transcript line. Text, filled buttons and the focus outline use `color-mix(in srgb, <red> 80%, #000)`, which gives `#af3232`. Browsers without `color-mix` use navy `#002b56` instead. Measured on the Savanna page:
+**Contrast on Savanna:** Savanna's red `#db3e3e` is only 4.40:1 on white, so the player uses it only for decoration: 1 px button borders (non-text, which needs 3:1), panel bars and the marker on the current transcript line. Text, filled buttons and the focus outline use `color-mix(in srgb, <red> 70%, #000)`, which gives `#992b2b`. That passes even the AAA level (7:1). Browsers without `color-mix` use navy `#002b56` instead. Measured on the Savanna page:
 
 | Pair | Ratio |
 |---|---|
-| Button text / white, white / filled button, focus outline / white | 6.32:1 |
-| Button text on hover background (`#f8d8d8`) | 4.75:1 |
-| Time stamp on the current transcript line | 6.09:1 |
+| Button text / white, white / filled button, focus outline / white | 7.68:1 |
+| Button text on hover background (`#f8f9fa`) | 7.28:1 |
+| Time stamp on the current transcript line | 10.01:1 |
 | Button border (exact red) / white | 4.40:1 (non-text) |
 | Select border / white | 4.69:1 (non-text) |
 
