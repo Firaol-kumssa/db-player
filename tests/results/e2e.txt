@@ -1,4 +1,4 @@
-PASS  /demo/blank.html  Tab reaches every control  (16 controls)
+PASS  /demo/blank.html  Tab reaches every control  (15 controls)
 PASS  /demo/blank.html  Every control is at least 44 × 44 px
 PASS  /demo/blank.html  K on the video plays
 PASS  /demo/blank.html  Transcript line 0:10 seeks to ≈10 s  (currentTime=10.41)
@@ -9,13 +9,13 @@ PASS  /demo/blank.html  Caption size + "below" persist after reload  ({"size":"x
 PASS  /demo/blank.html  .d-set opens, Escape closes, focus returns to .b-ccset
 PASS  /demo/blank.html  .d-help opens, Escape closes, focus returns to .b-help
 PASS  /demo/blank.html  Quiet mode silences the player's announcements  (pressed=true, live region kept "ጸጥ ያለ ሁኔታ በርቷል። ማጫወቻው አይና…")
-PASS  /demo/blank.html  Language switch: Amharic → English, remembered after reload  (አጫውት → Play; captions am → en; after reload en)
-PASS  /demo/blank.html  Language switch: back to Amharic  (አጫውት)
+PASS  /demo/blank.html  Page language switch: Amharic → English (page + player), remembered after reload  (አጫውት → Play; captions am → en; after reload en)
+PASS  /demo/blank.html  Page language switch: back to Amharic  (አጫውት)
 PASS  /demo/blank.html  320 px: document scrollWidth = 320  (scrollWidth=320)
 PASS  /demo/blank.html  320 px: nothing in the player overflows  (player 8–312 px)
 PASS  /demo/blank.html  200% zoom (640 CSS px): no control cut off
 PASS  /demo/blank.html  No console errors from db-player  (none)
-PASS  /pages/concept-with-navigation.html  Tab reaches every control  (16 controls)
+PASS  /pages/concept-with-navigation.html  Tab reaches every control  (15 controls)
 PASS  /pages/concept-with-navigation.html  Every control is at least 44 × 44 px
 PASS  /pages/concept-with-navigation.html  K on the video plays
 PASS  /pages/concept-with-navigation.html  Transcript line 0:10 seeks to ≈10 s  (currentTime=10.41)
@@ -26,9 +26,9 @@ PASS  /pages/concept-with-navigation.html  Caption size + "below" persist after 
 PASS  /pages/concept-with-navigation.html  .d-set opens, Escape closes, focus returns to .b-ccset
 PASS  /pages/concept-with-navigation.html  .d-help opens, Escape closes, focus returns to .b-help
 PASS  /pages/concept-with-navigation.html  Quiet mode silences the player's announcements  (pressed=true, live region kept "ጸጥ ያለ ሁኔታ በርቷል። ማጫወቻው አይና…")
-PASS  /pages/concept-with-navigation.html  Language switch: Amharic → English, remembered after reload  (አጫውት → Play; captions am → en; after reload en)
-PASS  /pages/concept-with-navigation.html  Language switch: back to Amharic  (አጫውት)
-FAIL  /pages/concept-with-navigation.html  320 px: document scrollWidth = 320  (scrollWidth=480 — Savanna header, not db-player)
+PASS  /pages/concept-with-navigation.html  Page language switch: Amharic → English (page + player), remembered after reload  (አጫውት → Play; captions am → en; after reload en)
+PASS  /pages/concept-with-navigation.html  Page language switch: back to Amharic  (አጫውት)
+FAIL  /pages/concept-with-navigation.html  320 px: document scrollWidth = 320  (scrollWidth=422 — Savanna header, not db-player)
 PASS  /pages/concept-with-navigation.html  320 px: nothing in the player overflows  (player 25–296 px)
 PASS  /pages/concept-with-navigation.html  200% zoom (640 CSS px): no control cut off
 PASS  /pages/concept-with-navigation.html  No console errors from db-player  (4 other (host) errors ignored)
