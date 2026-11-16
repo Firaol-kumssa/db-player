@@ -45,7 +45,7 @@ nginx serves the untouched Savanna starter as the site root and our `module/`, `
 | `src` | Lesson video (MP4) |
 | `captions` | Comma list of WebVTT files. Language is read from the name: `lesson.am.vtt` |
 | `describe` | Comma list of audio-description WebVTT files, one per language |
-| `sign` | Sign-language video. Empty = the player says honestly there is none yet and offers "Ask for a sign-language video" |
+| `sign` | Sign-language video. When it is empty or missing, the Sign language button is not shown |
 | `offline-audio` | Low-bitrate audio for the offline pack (default: `src` with `-low.mp3`) |
 | `lang` | `am` (default) or `en`. The starting interface language; the learner can change it with the language button, and their choice is remembered |
 | `poster`, `lesson-title` | Optional |
@@ -76,14 +76,14 @@ document.addEventListener('db-player:complete', () => markLessonDone());
 
 ### What the learner gets
 
-- Real `<button>` controls with visible names: Play/Pause, Back 10 s, Forward 10 s, Speed, Captions, Caption settings, Transcript, Audio description, Sign language, Full screen, Keyboard help. Controls never hide.
+- Real `<button>` controls with visible names: Play/Pause, Back 10 s, Forward 10 s, Speed, Captions, Caption settings, Transcript, Audio description, Quiet mode, Sign language (only when the lesson has a sign video), Full screen, Keyboard help. Controls never hide while you watch.
 - Keyboard: K or Space (on the video) plays and pauses, the arrows move 5 s, Tab moves between controls and Escape closes dialogs. Shortcuts work only while focus is inside the player (WCAG 2.1.4). They are listed in a real `<dialog>`.
 - Captions: the VTT tracks are set to `mode = 'hidden'`, and the player reads `cuechange` and draws cues itself. The learner chooses size (4), colours (3), background (solid or see-through) and position (top, bottom, or **below the video**, which is best at 200% zoom on a phone). The choice is remembered and announced.
 - Transcript: built from the same VTT. Every line is a button that jumps to its time, the current line is marked `aria-current`, and the whole transcript downloads as text.
 - Language: a button above the video, labelled in the other language ("English" or "አማርኛ", with its own `lang` so screen readers pronounce it correctly), switches every label, the captions, the transcript and the audio description between Amharic and English. The choice is saved and survives a reload. When the host page uses the page-wide switch (below), the player hides this button so there is only one switch, and follows the page instead.
 - Quiet mode: a toggle button that makes the player stop speaking (no audio-description voice) and stop sending announcements such as "Captions on" to the screen reader. It gives one last announcement first, and errors are still announced. A web page can't switch TalkBack itself off: on Android, hold both volume keys for 3 seconds (if the TalkBack shortcut is on) or go to Settings › Accessibility › TalkBack.
 - Audio description: when switched on, the video pauses at each description, reads it with `speechSynthesis` (am-ET), then resumes. If the phone has no Amharic voice, the text is shown on screen and sent to the screen reader through a live region.
-- Sign language: a second `<video>` kept in sync on play, pause, seeking and rate change, with drift corrected once a second. It moves with four position buttons and resizes with Larger/Smaller. No dragging.
+- Sign language (when a `sign` video is given): a second `<video>` kept in sync on play, pause, seeking and rate change, with drift corrected once a second. It moves with four position buttons and resizes with Larger/Smaller. No dragging.
 - Offline: "Download for offline (0.3 MB)" shows the size before the learner taps. A service worker then keeps the low-bitrate audio, the captions and a light lesson page (`module/offline.html`).
 
 ## Install, Level 2
@@ -167,7 +167,7 @@ python3 -m venv .venv && .venv/bin/pip install edge-tts pillow && PATH="$PWD/.ve
 
 Because the captions are written from the script, they match the narration word for word. For lessons that already exist, the pipeline would run speech-to-text first (Addis AI `/api/v2/stt`), then have a person correct the lines and times, then export to VTT. That editor page is **not built** yet. Amharic speech recognition quality has not been measured.
 
-**Honest note:** the narration voice is synthetic test content. There is no Ethiopian Sign Language video yet, so the player shows its "no sign video yet" state, which is the case most lessons will be in.
+**Honest note:** the narration voice is synthetic test content. There is no Ethiopian Sign Language video yet, so the Sign language button is hidden for this lesson. It appears, with the synced sign window, as soon as `sign="…"` points to a video.
 
 ## Offline and slow connection
 
@@ -205,7 +205,7 @@ Results from 15 November 2026 are saved in `tests/results/`.
 **End-to-end (`tests/e2e.mjs`), 35 of 36 checks pass**, on both `demo/blank.html` and the Savanna page:
 
 - No console errors from db-player.
-- Tab reaches every player control (15; the player's own language button is hidden because the page switch is present).
+- Tab reaches every player control (14; the player's own language button is hidden because the page switch is present, and the Sign language button because this lesson has no sign video).
 - The page-wide switch (top right) turns the page **and** the player from Amharic to English (`<html lang>`, labels, captions, transcript), is at least 44 × 44 px, survives a reload, and switches back.
 - Quiet mode makes one last announcement, then the live region stays silent.
 - Every control is at least 44 × 44 px.
@@ -258,7 +258,7 @@ Finished:
 
 - The player, with restylable captions and the transcript (seek and download).
 - Audio description.
-- The sign window (synced, with position and size buttons) and the no-sign state.
+- The sign window (synced, with position and size buttons), shown only when a sign video exists.
 - The offline pack.
 - Complete Amharic.
 - The blank and Savanna mounts.
