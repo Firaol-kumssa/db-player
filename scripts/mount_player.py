@@ -12,6 +12,7 @@ if "<db-player" in html:
 TAG = '''
 <!-- db-player (Track 2) -->
 <script src="/module/db-player.js" defer></script>
+<script src="/module/page-i18n.js" defer data-dict="/module/i18n/pages/concept-with-navigation.am.json"></script>
 <db-player src="/media/lesson.mp4" poster="/media/poster.png"
   captions="/media/lesson.am.vtt,/media/lesson.en.vtt"
   describe="/media/lesson.ad.am.vtt,/media/lesson.ad.en.vtt"
