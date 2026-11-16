@@ -67,12 +67,12 @@ for (const path of PAGES) {
   await page.locator(`${P} .b-tr`).click();
 
   // 4. Audio description pauses at slide 2 and resumes
-  await page.locator(`${P} .b-ad`).click();
+  await page.locator(`${P} .b-describe`).click();
   await page.evaluate(() => { const v = document.querySelector('db-player').shadowRoot.querySelector('video.main'); v.currentTime = 9.5; });
   await page.locator(`${P} .b-play`).click();
   const paused = await page.waitForFunction(() => {
     const r = document.querySelector('db-player').shadowRoot; const v = r.querySelector('video.main');
-    return v.paused && !r.querySelector('.adtext').hidden && v.currentTime > 9.9 ? { t: v.currentTime, text: r.querySelector('.adtext').textContent } : false;
+    return v.paused && !r.querySelector('.describe-text').hidden && v.currentTime > 9.9 ? { t: v.currentTime, text: r.querySelector('.describe-text').textContent } : false;
   }, null, { timeout: 8000 }).then((h) => h.jsonValue()).catch(() => null);
   check(path, 'AD pauses at slide-2 description', paused && /ስላይድ 2/.test(paused.text), paused ? `at ${paused.t.toFixed(2)} s` : 'did not pause');
   const resumed = await page.waitForFunction(() => {
@@ -80,7 +80,7 @@ for (const path of PAGES) {
   }, null, { timeout: 15000 }).then(() => true).catch(() => false);
   check(path, 'AD resumes playback after the description', resumed);
   await page.evaluate(() => document.querySelector('db-player').shadowRoot.querySelector('video.main').pause());
-  await page.locator(`${P} .b-ad`).click();
+  await page.locator(`${P} .b-describe`).click();
 
   // 5. Caption size + "below", persisted across reload
   await page.locator(`${P} .b-ccset`).click();

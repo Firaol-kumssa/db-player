@@ -15,9 +15,8 @@ for (const path of PAGES) {
   const page = await ctx.newPage();
   await page.goto(BASE + path, { waitUntil: 'networkidle' });
   await page.locator('db-player .b-play .lbl').filter({ hasText: /\S/ }).waitFor();
-  // open the transcript and the no-sign panel so their contents are scanned too
+  // open the transcript so its contents are scanned too
   await page.locator('db-player .b-tr').click();
-  await page.locator('db-player .b-sign').click();
   const { violations, passes } = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', ...(STRICT ? ['wcag2aaa', 'best-practice'] : [])]).analyze();
   console.log(`\n== ${path}: ${passes.length} rules passed, ${violations.length} rules with violations`);
