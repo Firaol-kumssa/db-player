@@ -46,6 +46,8 @@
   "quiet": "Quiet mode",
   "quietOn": "Quiet mode on. The player will not speak or announce changes.",
   "quietOff": "Quiet mode off. The player speaks again.",
+  "switchLang": "አማርኛ",
+  "langSwitched": "Language: English. Captions are now in English too.",
   "sign": "Sign language",
   "signOn": "Sign language window on",
   "signOff": "Sign language window off",

@@ -86,6 +86,7 @@ video.main:focus-visible{outline:3px solid #f5a300;outline-offset:-3px}
 .sign.tl{top:.5rem;inset-inline-start:.5rem}.sign.tr{top:.5rem;inset-inline-end:.5rem}
 .sign.bl{bottom:.5rem;inset-inline-start:.5rem}.sign.br{bottom:.5rem;inset-inline-end:.5rem}
 .adtext{margin:.75rem 0 0;padding:.75rem 1rem;border-inline-start:.25rem solid var(--accent);background:var(--soft);color:#1a1a1a;border-radius:0 var(--r) var(--r) 0}
+.langrow{display:flex;justify-content:flex-end;margin-bottom:.5rem}
 .seekrow{display:flex;align-items:center;gap:.75rem;margin-top:.75rem}
 .seek{flex:1;min-height:var(--tap);accent-color:var(--p);min-width:6rem;margin:0}
 .time{font-variant-numeric:tabular-nums;white-space:nowrap;color:inherit}
@@ -130,6 +131,7 @@ dt{font-weight:600}dd{margin:0}
 
   const HTML = `
 <div class="wrap" role="region" data-label="player">
+  <div class="langrow"><button type="button" class="b-lang" data-t="switchLang"></button></div>
   <div class="stage">
     <video class="main" playsinline preload="metadata" tabindex="0" data-label="video"></video>
     <div class="cap" hidden></div>
@@ -222,7 +224,7 @@ dt{font-weight:600}dd{margin:0}
       this.adLast = null;
     }
 
-    get uiLang() { return this.getAttribute('lang') === 'en' ? 'en' : 'am'; }
+    get uiLang() { return ((this.prefs && this.prefs.uiLang) || this.getAttribute('lang')) === 'en' ? 'en' : 'am'; }
     $(s) { return this.shadowRoot.querySelector(s); }
     $$(s) { return [...this.shadowRoot.querySelectorAll(s)]; }
     emit(name, detail = {}) { this.dispatchEvent(new CustomEvent(`db-player:${name}`, { bubbles: true, composed: true, detail })); }
@@ -249,7 +251,7 @@ dt{font-weight:600}dd{margin:0}
     }
 
     async attributeChangedCallback(name, oldV, newV) {
-      if (name === 'lang' && this.shadowRoot && oldV !== newV) { await this.loadText(); this.setupAD(); }
+      if (name === 'lang' && this.shadowRoot && oldV !== newV) { delete this.prefs.uiLang; writePrefs(this.prefs); await this.loadText(); this.setupAD(); this.applyPrefs(false); }
     }
 
     async loadText() {
@@ -261,6 +263,7 @@ dt{font-weight:600}dd{margin:0}
       this.$$('[data-label]').forEach((el) => el.setAttribute('aria-label', t[el.dataset.label] ?? ''));
       this.$$('.signtools [data-pos]').forEach((b) => { b.textContent = fill(t.moveTo, { pos: t[b.dataset.pos] }); });
       this.$('.b-req').setAttribute('lang', this.uiLang);
+      this.$('.b-lang').lang = this.uiLang === 'am' ? 'en' : 'am';
       this.fillLangSelect();
       this.refreshLabels();
     }
@@ -523,6 +526,16 @@ dt{font-weight:600}dd{margin:0}
         if (this.prefs.ad && !this.voiceFor(this.uiLang)) m += ` ${this.t.adNoVoice}`;
         if (!this.prefs.ad) { this.$('.adtext').hidden = true; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
         this.say(m);
+      });
+      this.$('.b-lang').addEventListener('click', async () => {
+        const next = this.uiLang === 'am' ? 'en' : 'am';
+        this.prefs.uiLang = next;
+        if (this.capFiles.map(langOf).includes(next)) { this.prefs.capLang = next; this.loadTranscript(); } // captions follow the interface
+        this.adLast = null;
+        if ('speechSynthesis' in window) speechSynthesis.cancel();
+        await this.loadText();
+        this.applyPrefs();
+        this.say(this.t.langSwitched);
       });
       this.$('.b-quiet').addEventListener('click', () => {
         const on = !this.prefs.quiet;
