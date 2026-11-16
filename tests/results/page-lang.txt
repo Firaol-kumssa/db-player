@@ -1,0 +1,12 @@
+PASS  Amharic: only course codes stay in English  (VA-1)
+PASS  Keyboard: the switch is reached early with Tab  (2 Tab presses)
+PASS  Enter switches the whole page to English  ({"html":"en","am":false})
+PASS  The switch stays visible and on top while scrolling
+PASS  Space switches back to Amharic
+PASS  Content the host adds later is translated
+PASS  Text the host rewrites is translated again
+PASS  The switch puts itself back if the header is rebuilt
+PASS  English restores the host's latest original text  ({"late":"Mark as complete Continue this course","h1":"Why Become a VA?"})
+PASS  Ten fast toggles: no errors  (none)
+
+all passed

@@ -9,7 +9,8 @@
     "test": "node --test tests/unit.test.mjs tests/api.test.mjs",
     "test:e2e": "node tests/e2e.mjs",
     "axe": "node tests/axe.mjs",
-    "slow3g": "node tests/slow3g.mjs"
+    "slow3g": "node tests/slow3g.mjs",
+    "test:page-lang": "node tests/page-lang.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

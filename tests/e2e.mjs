@@ -127,7 +127,7 @@ for (const path of PAGES) {
   // 6c. Page-wide language switch (module/page-i18n.js, top right): page + player Amharic -> English, remembered, and back
   const ui = () => page.evaluate(() => { const r = document.querySelector('db-player').shadowRoot;
     const sw = document.querySelector('#db-page-lang'); const box = sw.getBoundingClientRect();
-    return { html: document.documentElement.lang, lang: r.querySelector('.wrap').lang, play: r.querySelector('.b-play .lbl').textContent, sw: sw.textContent,
+    return { html: document.documentElement.lang, lang: r.querySelector('.wrap').lang, play: r.querySelector('.b-play .lbl').textContent, sw: sw.querySelector('span').textContent, // visible label only
       swLang: sw.lang, big: box.width >= 44 && box.height >= 44, ownHidden: getComputedStyle(r.querySelector('.langrow')).display === 'none',
       cap: r.querySelector('#f-lang').value, line: r.querySelector('.lines button')?.lang }; });
   const am = await ui();
@@ -145,6 +145,8 @@ for (const path of PAGES) {
   await page.locator('#db-page-lang').click();
   await page.waitForTimeout(300);
   const back = await ui();
+  const heard = await page.locator('#db-page-lang').ariaSnapshot();
+  check(path, 'Page language switch tells screen readers what it does', /English \(የገጹን ቋንቋ ቀይር\)|አማርኛ \(change page language\)/.test(heard), heard.trim());
   check(path, 'Page language switch: back to Amharic', back.html === 'am' && back.lang === 'am' && back.cap === 'am' && back.sw === 'English', back.play);
 
   // reset prefs for the next page

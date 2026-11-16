@@ -10,6 +10,7 @@ PASS  /demo/blank.html  .d-set opens, Escape closes, focus returns to .b-ccset
 PASS  /demo/blank.html  .d-help opens, Escape closes, focus returns to .b-help
 PASS  /demo/blank.html  Quiet mode silences the player's announcements  (pressed=true, live region kept "ጸጥ ያለ ሁኔታ በርቷል። ማጫወቻው አይና…")
 PASS  /demo/blank.html  Page language switch: Amharic → English (page + player), remembered after reload  (አጫውት → Play; captions am → en; after reload en)
+PASS  /demo/blank.html  Page language switch tells screen readers what it does  (- button "English (የገጹን ቋንቋ ቀይር)")
 PASS  /demo/blank.html  Page language switch: back to Amharic  (አጫውት)
 PASS  /demo/blank.html  320 px: document scrollWidth = 320  (scrollWidth=320)
 PASS  /demo/blank.html  320 px: nothing in the player overflows  (player 8–312 px)
@@ -27,6 +28,7 @@ PASS  /pages/concept-with-navigation.html  .d-set opens, Escape closes, focus re
 PASS  /pages/concept-with-navigation.html  .d-help opens, Escape closes, focus returns to .b-help
 PASS  /pages/concept-with-navigation.html  Quiet mode silences the player's announcements  (pressed=true, live region kept "ጸጥ ያለ ሁኔታ በርቷል። ማጫወቻው አይና…")
 PASS  /pages/concept-with-navigation.html  Page language switch: Amharic → English (page + player), remembered after reload  (አጫውት → Play; captions am → en; after reload en)
+PASS  /pages/concept-with-navigation.html  Page language switch tells screen readers what it does  (- button "English (የገጹን ቋንቋ ቀይር)")
 PASS  /pages/concept-with-navigation.html  Page language switch: back to Amharic  (አጫውት)
 FAIL  /pages/concept-with-navigation.html  320 px: document scrollWidth = 320  (scrollWidth=422 — Savanna header, not db-player)
 PASS  /pages/concept-with-navigation.html  320 px: nothing in the player overflows  (player 25–296 px)
@@ -39,4 +41,4 @@ PASS  /pages/concept-with-navigation.html  No console errors from db-player  (4 
   'Failed to load resource: the server responded with a status of 404 (Not Found)'
 ]
 
-33/34 passed
+35/36 passed
