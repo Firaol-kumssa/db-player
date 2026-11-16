@@ -87,6 +87,7 @@ video.main:focus-visible{outline:3px solid #f5a300;outline-offset:-3px}
 .sign.bl{bottom:.5rem;inset-inline-start:.5rem}.sign.br{bottom:.5rem;inset-inline-end:.5rem}
 .adtext{margin:.75rem 0 0;padding:.75rem 1rem;border-inline-start:.25rem solid var(--accent);background:var(--soft);color:#1a1a1a;border-radius:0 var(--r) var(--r) 0}
 .langrow{display:flex;justify-content:flex-end;margin-bottom:.5rem}
+:host([data-page-lang]) .langrow{display:none} /* the host page has one switch for everything (page-i18n.js) */
 .seekrow{display:flex;align-items:center;gap:.75rem;margin-top:.75rem}
 .seek{flex:1;min-height:var(--tap);accent-color:var(--p);min-width:6rem;margin:0}
 .time{font-variant-numeric:tabular-nums;white-space:nowrap;color:inherit}
@@ -251,7 +252,19 @@ dt{font-weight:600}dd{margin:0}
     }
 
     async attributeChangedCallback(name, oldV, newV) {
-      if (name === 'lang' && this.shadowRoot && oldV !== newV) { delete this.prefs.uiLang; writePrefs(this.prefs); await this.loadText(); this.setupAD(); this.applyPrefs(false); }
+      if (name === 'lang' && this.shadowRoot && oldV !== newV) await this.switchLang(newV === 'en' ? 'en' : 'am', false);
+    }
+
+    // Change the interface language. saved=true: the learner chose it (kept over the host's lang attribute).
+    // saved=false: the host chose it (lang attribute or a page-wide switch). Captions follow when that language exists.
+    async switchLang(next, saved) {
+      if (saved) this.prefs.uiLang = next; else delete this.prefs.uiLang;
+      if (this.capFiles && this.capFiles.map(langOf).includes(next) && this.prefs.capLang !== next) { this.prefs.capLang = next; this.loadTranscript(); }
+      this.adLast = null;
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      await this.loadText();
+      this.setupAD();
+      this.applyPrefs(false);
     }
 
     async loadText() {
@@ -529,13 +542,9 @@ dt{font-weight:600}dd{margin:0}
       });
       this.$('.b-lang').addEventListener('click', async () => {
         const next = this.uiLang === 'am' ? 'en' : 'am';
-        this.prefs.uiLang = next;
-        if (this.capFiles.map(langOf).includes(next)) { this.prefs.capLang = next; this.loadTranscript(); } // captions follow the interface
-        this.adLast = null;
-        if ('speechSynthesis' in window) speechSynthesis.cancel();
-        await this.loadText();
-        this.applyPrefs();
+        await this.switchLang(next, true);
         this.say(this.t.langSwitched);
+        this.emit('lang', { lang: next }); // lets the host page switch with the player (module/page-i18n.js)
       });
       this.$('.b-quiet').addEventListener('click', () => {
         const on = !this.prefs.quiet;
